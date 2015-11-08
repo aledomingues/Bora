@@ -31,6 +31,7 @@ Route::group(['prefix' => 'api/v1'], function() {
 	//Users
 	Route::post('users', 'UsersController@store');
 	Route::get('users/{permalink}', 'UsersController@show');
+	Route::get('login/linkedin', 'UsersController@loginWithLinkedin');
 
 	//Companies
 	Route::get('companies/{permalink}', 'CompaniesController@show');

@@ -112,4 +112,59 @@ class UsersController extends Controller {
 		return Response::json(Models\User::getuser($id));
 	}
 
+	public function loginWithLinkedin(Request $request)
+	{
+	    // get data from request
+	    $code = $request->get('code');
+
+	    $linkedinService = \OAuth::consumer('Linkedin');
+
+
+	    if ( ! is_null($code))
+	    {
+	        // This was a callback request from linkedin, get the token
+	        $token = $linkedinService->requestAccessToken($code);
+
+	        // Send a request with it. Please note that XML is the default format.
+	        $result = array();
+	        //$result = json_decode($linkedinService->request('/people/?format=json'), true);
+	        
+	        $data = array('json' => array(
+	        		'comment' => 'Comentario do teste',
+	        		'content' => array(
+		        		'title' => 'Teste de Compartilhamento',
+		        		'description' => '1, 2, 3 testando',
+		        		'submitted-url' => 'https://developer.linkedin.com',
+		        		'submitted-image-url' => 'http://www.videojobs.com.br/html/images/img-master-institucional.png'
+	        		),
+	        		'visibility' => array('code' => 'anyone')
+	        	));
+	        $headers = array(
+				'Content-Type' => 'application/json',
+				'x-li-format' => 'json',
+			);
+
+	        $resultShare = array();
+	        $resultShare[] = json_decode($linkedinService->request('/people/~/shares?format=json', 'POST', json_encode($data), $headers), true);
+	        $resultShare[] = json_decode($linkedinService->request('/companies/2414183/shares?format=json', 'POST', json_encode($data), $headers), true);
+
+	        // Show some of the resultant data
+	        echo 'Your linkedin first name is ' . $result['firstName'] . ' and your last name is ' . $result['lastName'];
+
+	        //Var_dump
+	        //display whole array.
+	        dd($result, $token, $resultShare);
+
+	    }
+	    // if not ask for permission first
+	    else
+	    {
+	        // get linkedinService authorization
+	        $url = $linkedinService->getAuthorizationUri(['state'=>'DCEEFWF45453sdffef424']);
+
+	        // return to linkedin login url
+	        return redirect((string)$url);
+	    }
+	}
+
 }
